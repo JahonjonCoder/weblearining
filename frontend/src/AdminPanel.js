@@ -8,6 +8,7 @@ function AdminPanel() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [courseId, setCourseId] = useState('');
+  const [questionCount, setQuestionCount] = useState(0);
   const [video, setVideo] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState('');
@@ -67,6 +68,10 @@ function AdminPanel() {
       setMessage('Kurs ID kiritilishi kerak');
       return;
     }
+    if (mode === 'exam' && (!questionCount || parseInt(questionCount, 10) <= 0)) {
+      setMessage('Savollar sonini ijobiy raqam qilib belgilang');
+      return;
+    }
 
     setUploading(true);
     setMessage('');
@@ -107,7 +112,7 @@ function AdminPanel() {
         fetchCourses();
       } else {
         // exam mode
-        const payload = { title, description, course_id: parseInt(courseId, 10) };
+        const payload = { title, description, course_id: parseInt(courseId, 10), question_count: parseInt(questionCount, 10) };
         if (editingExam) {
           // update
           await axios.put(`http://localhost:8000/exams/${editingExam.id}`, payload);
@@ -119,6 +124,7 @@ function AdminPanel() {
         setTitle('');
         setDescription('');
         setCourseId('');
+        setQuestionCount(0);
         setEditingExam(null);
         fetchExams();
       }
@@ -207,16 +213,24 @@ function AdminPanel() {
           />
         </div>
         {mode === 'exam' && (
-          <div className="admin-form-group mb-3">
+          <><div className="admin-form-group mb-3">
             <label>Kurs ID *</label>
             <input
               type="number"
               value={courseId}
               onChange={(e) => setCourseId(e.target.value)}
               placeholder="Imtixoningiz qaysi kursga tegishli"
-              className="admin-input form-control"
-            />
-          </div>
+              className="admin-input form-control" />
+          </div><div className="admin-form-group mb-3">
+              <label>Savollar soni *</label>
+              <input
+                type="number"
+                value={questionCount}
+                onChange={(e) => setQuestionCount(e.target.value)}
+                placeholder="Imtixon uchun savollar soni"
+                className="admin-input form-control"
+                min={1} />
+            </div></>
         )}
 
         <div className="admin-form-group mb-3">

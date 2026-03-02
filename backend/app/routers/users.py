@@ -4,7 +4,7 @@ from .. import schemas, models
 from ..database import get_db
 from passlib.context import CryptContext
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 
 router = APIRouter()
 
@@ -13,6 +13,9 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db_user = db.query(models.User).filter(models.User.email == user.email).first()
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
+    pw_bytes = user.password.encode('utf-8') if isinstance(user.password, str) else bytes(user.password)
+    if len(pw_bytes) > 72:
+        raise HTTPException(status_code=400, detail="Password too long (max 72 bytes)")
     hashed_password = pwd_context.hash(user.password)
     db_user = models.User(email=user.email, full_name=user.full_name, hashed_password=hashed_password, is_admin=user.is_admin)
     db.add(db_user)
@@ -26,6 +29,9 @@ def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
     existing = db.query(models.User).filter(models.User.email == user.email).first()
     if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
+    pw_bytes = user.password.encode('utf-8') if isinstance(user.password, str) else bytes(user.password)
+    if len(pw_bytes) > 72:
+        raise HTTPException(status_code=400, detail="Password too long (max 72 bytes)")
     hashed_password = pwd_context.hash(user.password)
     db_user = models.User(email=user.email, full_name=user.full_name, hashed_password=hashed_password, is_admin=user.is_admin)
     db.add(db_user)

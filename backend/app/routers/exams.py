@@ -10,7 +10,9 @@ def create_exam(exam: schemas.ExamCreate, db: Session = Depends(get_db)):
     db_course = db.query(models.Course).filter(models.Course.id == exam.course_id).first()
     if not db_course:
         raise HTTPException(status_code=404, detail="Course not found")
-    db_exam = models.Exam(**exam.dict())
+    # include question_count if provided
+    data = exam.dict()
+    db_exam = models.Exam(**data)
     db.add(db_exam)
     db.commit()
     db.refresh(db_exam)
@@ -40,6 +42,7 @@ def update_exam(exam_id: int, exam_update: schemas.ExamCreate, db: Session = Dep
     db_exam.title = exam_update.title
     db_exam.description = exam_update.description
     db_exam.course_id = exam_update.course_id
+    db_exam.question_count = getattr(exam_update, 'question_count', db_exam.question_count)
     db.add(db_exam)
     db.commit()
     db.refresh(db_exam)

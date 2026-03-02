@@ -28,6 +28,7 @@ class Exam(Base):
     title = Column(String, index=True)
     description = Column(Text, nullable=True)
     course_id = Column(Integer, ForeignKey("courses.id"))
+    question_count = Column(Integer, default=0)
     course = relationship("Course", back_populates="exams")
     questions = relationship("Question", back_populates="exam")
 

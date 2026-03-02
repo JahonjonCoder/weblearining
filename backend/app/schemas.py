@@ -23,6 +23,7 @@ class ExamBase(BaseModel):
     title: str
     description: Optional[str] = None
     course_id: int
+    question_count: int = 0
 
 class ExamCreate(ExamBase):
     pass
