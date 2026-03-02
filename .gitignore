@@ -1,0 +1,12 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# node
+node_modules/
+/build
+/dist
+
+# database
+*.db
