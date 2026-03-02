@@ -14,11 +14,34 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
     hashed_password = pwd_context.hash(user.password)
-    db_user = models.User(email=user.email, full_name=user.full_name, hashed_password=hashed_password)
+    db_user = models.User(email=user.email, full_name=user.full_name, hashed_password=hashed_password, is_admin=user.is_admin)
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
     return db_user
+
+
+@router.post('/register')
+def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    existing = db.query(models.User).filter(models.User.email == user.email).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    hashed_password = pwd_context.hash(user.password)
+    db_user = models.User(email=user.email, full_name=user.full_name, hashed_password=hashed_password, is_admin=user.is_admin)
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return {"success": True, "user": {"id": db_user.id, "email": db_user.email, "full_name": db_user.full_name, "is_admin": db_user.is_admin}}
+
+
+@router.post('/login')
+def login(payload: schemas.UserLogin, db: Session = Depends(get_db)):
+    db_user = db.query(models.User).filter(models.User.email == payload.email).first()
+    if not db_user:
+        raise HTTPException(status_code=400, detail="Invalid credentials")
+    if not pwd_context.verify(payload.password, db_user.hashed_password):
+        raise HTTPException(status_code=400, detail="Invalid credentials")
+    return {"success": True, "user": {"id": db_user.id, "email": db_user.email, "full_name": db_user.full_name, "is_admin": db_user.is_admin}}
 
 @router.get("/{user_id}", response_model=schemas.User)
 def read_user(user_id: int, db: Session = Depends(get_db)):

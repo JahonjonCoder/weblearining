@@ -28,7 +28,7 @@ def read_exam(exam_id: int, db: Session = Depends(get_db)):
     return db_exam
 
 @router.post("/{exam_id}/questions", response_model=schemas.Question)
-def add_question(exam_id: int, question: schemas.Question, db: Session = Depends(get_db)):
+def add_question(exam_id: int, question: schemas.QuestionCreate, db: Session = Depends(get_db)):
     db_exam = db.query(models.Exam).filter(models.Exam.id == exam_id).first()
     if not db_exam:
         raise HTTPException(status_code=404, detail="Exam not found")
@@ -38,18 +38,18 @@ def add_question(exam_id: int, question: schemas.Question, db: Session = Depends
     db.refresh(db_question)
     # create options if provided
     for opt in question.options:
-        db_opt = models.Option(text=opt.text, is_correct=1 if opt.is_correct else 0, question_id=db_question.id)
+        db_opt = models.Option(text=opt.text, is_correct=opt.is_correct, question_id=db_question.id)
         db.add(db_opt)
     db.commit()
     db.refresh(db_question)
     return db_question
 
 @router.post("/questions/{question_id}/options", response_model=schemas.Option)
-def add_option(question_id: int, option: schemas.Option, db: Session = Depends(get_db)):
+def add_option(question_id: int, option: schemas.OptionCreate, db: Session = Depends(get_db)):
     db_question = db.query(models.Question).filter(models.Question.id == question_id).first()
     if not db_question:
         raise HTTPException(status_code=404, detail="Question not found")
-    db_opt = models.Option(text=option.text, is_correct=1 if option.is_correct else 0, question_id=question_id)
+    db_opt = models.Option(text=option.text, is_correct=option.is_correct, question_id=question_id)
     db.add(db_opt)
     db.commit()
     db.refresh(db_opt)

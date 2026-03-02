@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 from .database import Base
 
@@ -8,6 +8,7 @@ class User(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     full_name = Column(String, nullable=True)
     hashed_password = Column(String, nullable=False)
+    is_admin = Column(Boolean, default=False)
     courses = relationship("Course", back_populates="owner")
 
 class Course(Base):
@@ -44,6 +45,6 @@ class Option(Base):
     __tablename__ = "options"
     id = Column(Integer, primary_key=True, index=True)
     text = Column(String, nullable=False)
-    is_correct = Column(Integer, default=0)  # 0/1
+    is_correct = Column(Boolean, default=False)
     question_id = Column(Integer, ForeignKey("questions.id"))
     question = relationship("Question", back_populates="options")
