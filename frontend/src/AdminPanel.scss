@@ -74,4 +74,18 @@
   color: white;
 }
 
+.admin-mode-tabs {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.admin-form-title {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: #333;
+  text-align: center;
+}
+
 /* add other utility styles if needed */

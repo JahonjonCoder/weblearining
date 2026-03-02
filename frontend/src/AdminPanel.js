@@ -185,7 +185,7 @@ function AdminPanel() {
   return (
     <div className="admin-container">
       <h2>Admin Panel</h2>
-      <div className="mb-3">
+      <div className="mb-3 admin-mode-tabs">
         <button
           type="button"
           onClick={() => handleModeChange('course')}
@@ -201,6 +201,9 @@ function AdminPanel() {
           Imtixon Qo'shish
         </button>
       </div>
+      <h3 className="admin-form-title">
+        {mode === 'course' ? "Kurs yarating" : "Imtixon yarating"}
+      </h3>
       <form onSubmit={handleSubmit} className="admin-form">
         <div className="admin-form-group mb-3">
           <label>{mode === 'course' ? 'Kurs Nomi *' : 'Imtixon Nomi *'}</label>
@@ -213,7 +216,8 @@ function AdminPanel() {
           />
         </div>
         {mode === 'exam' && (
-          <><div className="admin-form-group mb-3">
+          <>
+            {/* exam-specific inputs */}<div className="admin-form-group mb-3">
             <label>Kurs ID *</label>
             <input
               type="number"

@@ -79,18 +79,22 @@ function App() {
       <nav className="app-nav navbar navbar-expand-lg">
         <h1 className="app-title">📚 WebLearning</h1>
         <div className="app-nav-buttons">
-          <button
-            className={`app-nav-button${view === 'courses' ? ' active' : ''}`}
-            onClick={goToCourses}
-          >
-            Kurslar
-          </button>
-          <button
-            className={`app-nav-button${view === 'exams' ? ' active' : ''}`}
-            onClick={goToExams}
-          >
-            Imtixon
-          </button>
+          {user && (
+            <>
+              <button
+                className={`app-nav-button${view === 'courses' ? ' active' : ''}`}
+                onClick={goToCourses}
+              >
+                Kurslar
+              </button>
+              <button
+                className={`app-nav-button${view === 'exams' ? ' active' : ''}`}
+                onClick={goToExams}
+              >
+                Imtixon
+              </button>
+            </>
+          )}
           {user?.is_admin && (
             <button
               className={`app-nav-button${view === 'admin' ? ' active' : ''}`}
@@ -129,25 +133,31 @@ function App() {
       <div className="app-content">
         {view === 'courses' && (
           <div>
-            <h2>Mavjud Kurslar</h2>
-            {courses.length === 0 ? (
-              <p>Hozircha kurslar mavjud emas.</p>
+            {!user ? (
+              <p>Iltimos, kurslar va imtihonlarni ko'rish uchun kirish qiling.</p>
             ) : (
-              <ul className="course-list-simple">
-                {courses.map(course => (
-                  <li
-                    key={course.id}
-                    className="course-list-item"
-                    onClick={() => viewCourse(course)}
-                  >
-                    <div>
-                      <strong>{course.title}</strong>
-                      <div className="text-muted">{course.description}</div>
-                    </div>
-                    {course.video_url && <div className="text-primary">▶ Video</div>}
-                  </li>
-                ))}
-              </ul>
+              <>
+                <h2>Mavjud Kurslar</h2>
+                {courses.length === 0 ? (
+                  <p>Hozircha kurslar mavjud emas.</p>
+                ) : (
+                  <ul className="course-list-simple">
+                    {courses.map(course => (
+                      <li
+                        key={course.id}
+                        className="course-list-item"
+                        onClick={() => viewCourse(course)}
+                      >
+                        <div>
+                          <strong>{course.title}</strong>
+                          <div className="text-muted">{course.description}</div>
+                        </div>
+                        {course.video_url && <div className="text-primary">▶ Video</div>}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </>
             )}
           </div>
         )}
@@ -185,21 +195,27 @@ function App() {
 
         {view === 'exams' && (
           <div>
-            <h2>Imtixonlar</h2>
-            {exams.length === 0 ? (
-              <p>Hozircha imtixonlar mavjud emas.</p>
+            {!user ? (
+              <p>Iltimos, imtixonlarni ko'rish uchun kirish qiling.</p>
             ) : (
-              <ul>
-                {exams.map(exam => (
-                  <li
-                    key={exam.id}
-                    className="app-exam-item"
-                    onClick={() => takeExam(exam)}
-                  >
-                    {exam.title} (kurs ID: {exam.course_id})
-                  </li>
-                ))}
-              </ul>
+              <>
+                <h2>Imtixonlar</h2>
+                {exams.length === 0 ? (
+                  <p>Hozircha imtixonlar mavjud emas.</p>
+                ) : (
+                  <ul>
+                    {exams.map(exam => (
+                      <li
+                        key={exam.id}
+                        className="app-exam-item"
+                        onClick={() => takeExam(exam)}
+                      >
+                        {exam.title} (kurs ID: {exam.course_id})
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </>
             )}
           </div>
         )}
