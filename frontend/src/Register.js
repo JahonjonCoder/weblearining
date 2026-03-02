@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import './Register.scss';
 
 function Register({ onRegisterSuccess, onSwitchToLogin }) {
   const [email, setEmail] = useState('');
@@ -61,12 +62,12 @@ function Register({ onRegisterSuccess, onSwitchToLogin }) {
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h2 style={styles.title}>📚 WebLearning Register</h2>
-        
-        <div style={styles.userTypeSelector}>
-          <label style={{ marginRight: '1rem' }}>
+    <div className="register-container">
+      <div className="register-card">
+        <h2 className="register-title">📚 WebLearning Register</h2>
+
+        <div className="register-user-type">
+          <label className="me-3">
             <input
               type="radio"
               value="user"
@@ -86,73 +87,69 @@ function Register({ onRegisterSuccess, onSwitchToLogin }) {
           </label>
         </div>
 
-        <form onSubmit={handleSubmit} style={styles.form}>
-          <div style={styles.formGroup}>
-            <label>To'liq Ismi</label>
+        <form onSubmit={handleSubmit} className="register-form">
+          <div className="mb-3">
+            <label className="form-label">To'liq Ismi</label>
             <input
               type="text"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               placeholder="Ismingizni kiriting"
-              style={styles.input}
+              className="form-control"
             />
           </div>
 
-          <div style={styles.formGroup}>
-            <label>Email</label>
+          <div className="mb-3">
+            <label className="form-label">Email</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Email manzilingizni kiriting"
-              style={styles.input}
+              className="form-control"
             />
           </div>
 
-          <div style={styles.formGroup}>
-            <label>Parol</label>
+          <div className="mb-3">
+            <label className="form-label">Parol</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Kuchli parol yarating"
-              style={styles.input}
+              className="form-control"
             />
           </div>
 
-          <div style={styles.formGroup}>
-            <label>Parolni Qayta Kiriting</label>
+          <div className="mb-3">
+            <label className="form-label">Parolni Qayta Kiriting</label>
             <input
               type="password"
               value={passwordConfirm}
               onChange={(e) => setPasswordConfirm(e.target.value)}
               placeholder="Parolni qayta kiriting"
-              style={styles.input}
+              className="form-control"
             />
           </div>
 
-          <button type="submit" disabled={loading} style={styles.button}>
+          <button type="submit" disabled={loading} className="btn btn-primary register-button">
             {loading ? 'Jarayon...' : 'Ro\'yxatdan O\'tish'}
           </button>
         </form>
 
         {message && (
-          <p style={{
-            ...styles.message,
-            backgroundColor: message.includes('✅') ? '#d4edda' : '#f8d7da',
-            color: message.includes('✅') ? '#155724' : '#721c24',
-          }}>
+          <div
+            className={`mt-3 ${
+              message.includes('✅') ? 'alert alert-success' : 'alert alert-danger'
+            }`}
+          >
             {message}
-          </p>
+          </div>
         )}
 
-        <p style={styles.footer}>
+        <p className="register-footer">
           Allaqachon akkauntingiz bormi?{' '}
-          <button
-            type="button"
-            onClick={onSwitchToLogin}
-            style={styles.linkButton}
-          >
+          <button type="button" onClick={onSwitchToLogin} className="register-link">
             Kirish
           </button>
         </p>
@@ -160,84 +157,5 @@ function Register({ onRegisterSuccess, onSwitchToLogin }) {
     </div>
   );
 }
-
-const styles = {
-  container: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    minHeight: '100vh',
-    backgroundColor: '#f5f5f5',
-    padding: '1rem',
-  },
-  card: {
-    backgroundColor: 'white',
-    borderRadius: '8px',
-    boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-    padding: '2rem',
-    maxWidth: '400px',
-    width: '100%',
-  },
-  title: {
-    textAlign: 'center',
-    color: '#282c34',
-    marginBottom: '1.5rem',
-    fontSize: '1.8rem',
-  },
-  userTypeSelector: {
-    display: 'flex',
-    justifyContent: 'center',
-    marginBottom: '1.5rem',
-    padding: '1rem',
-    backgroundColor: '#f9f9f9',
-    borderRadius: '6px',
-  },
-  form: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '1rem',
-  },
-  formGroup: {
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  input: {
-    padding: '0.75rem',
-    fontSize: '1rem',
-    border: '1px solid #ccc',
-    borderRadius: '4px',
-    marginTop: '0.25rem',
-  },
-  button: {
-    padding: '0.75rem 1.5rem',
-    backgroundColor: '#28a745',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    fontSize: '1rem',
-    cursor: 'pointer',
-    fontWeight: 'bold',
-    marginTop: '1rem',
-  },
-  message: {
-    marginTop: '1rem',
-    padding: '0.75rem',
-    borderRadius: '4px',
-    textAlign: 'center',
-  },
-  footer: {
-    textAlign: 'center',
-    marginTop: '1rem',
-    color: '#666',
-  },
-  linkButton: {
-    backgroundColor: 'transparent',
-    border: 'none',
-    color: '#007bff',
-    cursor: 'pointer',
-    textDecoration: 'underline',
-    fontSize: '1rem',
-  },
-};
 
 export default Register;

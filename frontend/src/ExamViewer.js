@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import './ExamViewer.scss';
 
 function ExamViewer({ exam, onBack }) {
   const [answers, setAnswers] = useState({});
@@ -25,7 +26,7 @@ function ExamViewer({ exam, onBack }) {
 
   return (
     <div>
-      <button onClick={onBack} style={{ marginBottom: '1rem' }}>🔙 Orqaga</button>
+      <button onClick={onBack} className="btn btn-secondary exam-viewer-back">🔙 Orqaga</button>
       <h2>{exam.title}</h2>
       <p>{exam.description}</p>
 
@@ -34,10 +35,10 @@ function ExamViewer({ exam, onBack }) {
       ) : (
         <form onSubmit={handleSubmit}>
           {exam.questions.map(q => (
-            <div key={q.id} style={{ marginBottom: '1.5rem' }}>
+            <div key={q.id} className="exam-question">
               <p><strong>{q.text}</strong></p>
               {q.options.map(o => (
-                <div key={o.id}>
+                <div key={o.id} className="exam-options">
                   <label>
                     <input
                       type="radio"
@@ -52,12 +53,12 @@ function ExamViewer({ exam, onBack }) {
               ))}
             </div>
           ))}
-          {!submitted && <button type="submit">Yuborish</button>}
+          {!submitted && <button type="submit" className="btn btn-primary exam-submit-btn">Yuborish</button>}
         </form>
       )}
 
       {submitted && (
-        <div style={{ marginTop: '1rem' }}>
+        <div className="exam-result">
           <p>Natija: {score} / {exam.questions.length}</p>
         </div>
       )}

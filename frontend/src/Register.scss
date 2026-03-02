@@ -1,0 +1,56 @@
+/* Custom styles for Register component */
+
+.register-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  padding: 1rem;
+}
+
+.register-card {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  padding: 2rem;
+  max-width: 400px;
+  width: 100%;
+}
+
+.register-title {
+  text-align: center;
+  color: #282c34;
+  margin-bottom: 1.5rem;
+  font-size: 1.8rem;
+}
+
+.register-user-type {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background-color: #f9f9f9;
+  border-radius: 6px;
+}
+
+.register-form .form-group {
+  margin-bottom: 1rem;
+}
+
+.register-button {
+  width: 100%;
+}
+
+.register-footer {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.register-link {
+  background: none;
+  border: none;
+  color: #007bff;
+  padding: 0;
+  cursor: pointer;
+}

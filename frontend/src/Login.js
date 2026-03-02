@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import './Login.scss';
 
 function Login({ onLoginSuccess, onSwitchToRegister }) {
   const [email, setEmail] = useState('');
@@ -32,41 +33,54 @@ function Login({ onLoginSuccess, onSwitchToRegister }) {
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h2 style={styles.title}>Kirish</h2>
-        <form onSubmit={handleSubmit} style={styles.form}>
-          <div style={styles.formGroup}>
-            <label>Email</label>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} style={styles.input} />
+    <div className="login-container">
+      <div className="login-card">
+        <h2 className="login-title">Kirish</h2>
+        <form onSubmit={handleSubmit} className="login-form">
+          <div className="mb-3">
+            <label className="form-label">Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="form-control"
+            />
           </div>
-          <div style={styles.formGroup}>
-            <label>Parol</label>
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} style={styles.input} />
+          <div className="mb-3">
+            <label className="form-label">Parol</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="form-control"
+            />
           </div>
 
-          <button type="submit" disabled={loading} style={styles.button}>{loading ? 'Jarayon...' : 'Kirish'}</button>
+          <button type="submit" disabled={loading} className="btn btn-primary login-button">
+            {loading ? 'Jarayon...' : 'Kirish'}
+          </button>
         </form>
 
-        {message && <p style={{ ...styles.message, backgroundColor: message.includes('✅') ? '#d4edda' : '#f8d7da', color: message.includes('✅') ? '#155724' : '#721c24' }}>{message}</p>}
+        {message && (
+          <div
+            className={`mt-3 ${
+              message.includes('✅') ? 'alert alert-success' : 'alert alert-danger'
+            }`}
+          >
+            {message}
+          </div>
+        )}
 
-        <p style={styles.footer}>Ro'yxatdan o'tmaganmisiz? <button onClick={onSwitchToRegister} style={styles.linkButton}>Ro'yxatdan o'tish</button></p>
+        <p className="login-footer">
+          Ro'yxatdan o'tmaganmisiz?{' '}
+          <button onClick={onSwitchToRegister} className="login-link">
+            Ro'yxatdan o'tish
+          </button>
+        </p>
       </div>
     </div>
   );
 }
 
-const styles = {
-  container: { display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', backgroundColor: '#f5f5f5', padding: '1rem' },
-  card: { backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 4px 20px rgba(0,0,0,0.1)', padding: '2rem', maxWidth: '400px', width: '100%' },
-  title: { textAlign: 'center', color: '#282c34', marginBottom: '1.5rem', fontSize: '1.8rem' },
-  form: { display: 'flex', flexDirection: 'column', gap: '1rem' },
-  formGroup: { display: 'flex', flexDirection: 'column' },
-  input: { padding: '0.75rem', fontSize: '1rem', border: '1px solid #ccc', borderRadius: '4px', marginTop: '0.25rem' },
-  button: { padding: '0.75rem 1.5rem', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px', fontSize: '1rem', cursor: 'pointer', fontWeight: 'bold', marginTop: '1rem' },
-  message: { marginTop: '1rem', padding: '0.75rem', borderRadius: '4px', textAlign: 'center' },
-  footer: { textAlign: 'center', marginTop: '1rem', color: '#666' },
-  linkButton: { backgroundColor: 'transparent', border: 'none', color: '#007bff', cursor: 'pointer', textDecoration: 'underline', fontSize: '1rem' },
-};
 
 export default Login;

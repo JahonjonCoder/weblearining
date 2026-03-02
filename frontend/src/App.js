@@ -2,12 +2,18 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import AdminPanel from './AdminPanel';
 import ExamViewer from './ExamViewer';
+import Login from './Login';
+import Register from './Register';
+import './App.scss';
 
 function App() {
   const [courses, setCourses] = useState([]);
   const [exams, setExams] = useState([]);
   const [selectedExam, setSelectedExam] = useState(null);
-  const [view, setView] = useState('courses'); // 'courses' or 'admin' or 'exams' or 'takeExam'
+  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [courseExams, setCourseExams] = useState([]);
+  const [view, setView] = useState('courses'); // 'courses' or 'admin' or 'exams' or 'takeExam' or 'courseDetail' or 'login' or 'register' or 'profile'
+  const [user, setUser] = useState(null); // logged-in user info
 
   useEffect(() => {
     fetchCourses();
@@ -49,6 +55,18 @@ function App() {
       .catch(err => console.error(err));
   };
 
+  const viewCourse = (course) => {
+    setSelectedCourse(course);
+    // filter or fetch exams for this course
+    axios.get('http://localhost:8000/exams/')
+      .then(resp => {
+        const examsFor = resp.data.filter(e => e.course_id === course.id);
+        setCourseExams(examsFor);
+        setView('courseDetail');
+      })
+      .catch(err => console.error(err));
+  };
+
   const backToExams = () => {
     setSelectedExam(null);
     setView('exams');
@@ -56,45 +74,111 @@ function App() {
   };
 
   return (
-    <div style={{ padding: '0' }}>
+    <div className="app-container">
       {/* Navigation Bar */}
-      <nav style={styles.nav}>
-        <h1 style={styles.title}>📚 WebLearning</h1>
-        <div style={styles.navButtons}>
-          <button onClick={goToCourses} style={view === 'courses' ? { ...styles.navButton, ...styles.active } : styles.navButton}>
+      <nav className="app-nav navbar navbar-expand-lg">
+        <h1 className="app-title">📚 WebLearning</h1>
+        <div className="app-nav-buttons">
+          <button
+            className={`app-nav-button${view === 'courses' ? ' active' : ''}`}
+            onClick={goToCourses}
+          >
             Kurslar
           </button>
-          <button onClick={goToExams} style={view === 'exams' ? { ...styles.navButton, ...styles.active } : styles.navButton}>
+          <button
+            className={`app-nav-button${view === 'exams' ? ' active' : ''}`}
+            onClick={goToExams}
+          >
             Imtixon
           </button>
-          <button onClick={goToAdmin} style={view === 'admin' ? { ...styles.navButton, ...styles.active } : styles.navButton}>
-            Admin
-          </button>
+          {user?.is_admin && (
+            <button
+              className={`app-nav-button${view === 'admin' ? ' active' : ''}`}
+              onClick={goToAdmin}
+            >
+              Admin
+            </button>
+          )}
+          {user ? (
+            <button
+              className={`app-nav-button${view === 'profile' ? ' active' : ''}`}
+              onClick={() => setView('profile')}
+            >
+              Profil
+            </button>
+          ) : (
+            <>
+              <button
+                className={`app-nav-button${view === 'login' ? ' active' : ''}`}
+                onClick={() => setView('login')}
+              >
+                Kirish
+              </button>
+              <button
+                className={`app-nav-button${view === 'register' ? ' active' : ''}`}
+                onClick={() => setView('register')}
+              >
+                Ro'yxatdan o'tish
+              </button>
+            </>
+          )}
         </div>
       </nav>
 
       {/* Main Content */}
-      <div style={styles.content}>
+      <div className="app-content">
         {view === 'courses' && (
           <div>
             <h2>Mavjud Kurslar</h2>
             {courses.length === 0 ? (
               <p>Hozircha kurslar mavjud emas.</p>
             ) : (
-              <div style={styles.courseList}>
+              <ul className="course-list-simple">
                 {courses.map(course => (
-                  <div key={course.id} style={styles.courseCard}>
-                    <h3>{course.title}</h3>
-                    <p>{course.description}</p>
-                    {course.video_url && (
-                      <video width="100%" height="200" controls style={styles.video}>
-                        <source src={`http://localhost:8000${course.video_url}`} type="video/mp4" />
-                        Video fayli qo'llab-quvvatlanmaydi
-                      </video>
-                    )}
-                  </div>
+                  <li
+                    key={course.id}
+                    className="course-list-item"
+                    onClick={() => viewCourse(course)}
+                  >
+                    <div>
+                      <strong>{course.title}</strong>
+                      <div className="text-muted">{course.description}</div>
+                    </div>
+                    {course.video_url && <div className="text-primary">▶ Video</div>}
+                  </li>
                 ))}
-              </div>
+              </ul>
+            )}
+          </div>
+        )}
+        {view === 'courseDetail' && selectedCourse && (
+          <div>
+            <button className="btn btn-secondary mb-3" onClick={goToCourses}>
+              ← Kurslar ro'yxatiga qaytish
+            </button>
+            <h2>{selectedCourse.title}</h2>
+            <p>{selectedCourse.description}</p>
+            {selectedCourse.video_url && (
+              <video width="100%" height="480" controls className="app-video">
+                <source src={`http://localhost:8000${selectedCourse.video_url}`} type="video/mp4" />
+                Video qo'llab-quvvatlanmaydi.
+              </video>
+            )}
+            <h3>Kursga doir imtixonlar</h3>
+            {courseExams.length === 0 ? (
+              <p>Bu kursga imtixonlar mavjud emas.</p>
+            ) : (
+              <ul>
+                {courseExams.map(ex => (
+                  <li
+                    key={ex.id}
+                    className="app-exam-item"
+                    onClick={() => takeExam(ex)}
+                  >
+                    {ex.title}
+                  </li>
+                ))}
+              </ul>
             )}
           </div>
         )}
@@ -107,7 +191,11 @@ function App() {
             ) : (
               <ul>
                 {exams.map(exam => (
-                  <li key={exam.id} style={styles.examItem} onClick={() => takeExam(exam)}>
+                  <li
+                    key={exam.id}
+                    className="app-exam-item"
+                    onClick={() => takeExam(exam)}
+                  >
                     {exam.title} (kurs ID: {exam.course_id})
                   </li>
                 ))}
@@ -120,70 +208,28 @@ function App() {
           <ExamViewer exam={selectedExam} onBack={backToExams} />
         )}
 
-        {view === 'admin' && <AdminPanel />}
+        {view === 'admin' && user?.is_admin && <AdminPanel />}
+
+        {view === 'login' && <Login onLoginSuccess={(u) => { setUser(u); setView('courses'); }} onSwitchToRegister={() => setView('register')} />}
+        {view === 'register' && <Register onRegisterSuccess={() => setView('login')} onSwitchToLogin={() => setView('login')} />}
+        {view === 'profile' && user && (
+          <div className="p-4">
+            <h2>Profil</h2>
+            <p><strong>Email:</strong> {user.email}</p>
+            <p><strong>Ism:</strong> {user.full_name}</p>
+            <p><strong>Role:</strong> {user.is_admin ? 'Admin' : 'Oquvchi'}</p>
+            <button
+              onClick={() => { setUser(null); setView('courses'); }}
+              className="btn btn-danger mt-2"
+            >
+              Chiqish
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
 }
-
-const styles = {
-  nav: {
-    backgroundColor: '#282c34',
-    padding: '1rem 2rem',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    color: 'white',
-  },
-  title: {
-    margin: 0,
-    fontSize: '1.5rem',
-  },
-  navButtons: {
-    display: 'flex',
-    gap: '1rem',
-  },
-  navButton: {
-    padding: '0.5rem 1rem',
-    backgroundColor: 'transparent',
-    color: 'white',
-    border: '2px solid white',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    fontSize: '1rem',
-  },
-  examItem: {
-    cursor: 'pointer',
-    textDecoration: 'underline',
-    color: '#007bff',
-    marginBottom: '0.5rem',
-  },
-  active: {
-    backgroundColor: 'white',
-    color: '#282c34',
-  },
-  content: {
-    padding: '2rem',
-    maxWidth: '1200px',
-    margin: '0 auto',
-  },
-  courseList: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-    gap: '1.5rem',
-  },
-  courseCard: {
-    backgroundColor: '#f9f9f9',
-    border: '1px solid #ddd',
-    borderRadius: '8px',
-    padding: '1rem',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-  },
-  video: {
-    marginTop: '1rem',
-    borderRadius: '4px',
-  },
-};
 
 export default App;
 
