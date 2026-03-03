@@ -76,7 +76,14 @@ function AdminPanel() {
       setMessage('Savollar sonini ijobiy raqam qilib belgilang');
       return;
     }
-    // youtube url is optional, no validation>
+
+    setUploading(true);
+    setMessage('');
+
+    try {
+      if (mode === 'course') {
+        const formData = new FormData();
+        formData.append('title', title);
         formData.append('description', description);
         formData.append('owner_id', 1); // default user
         if (video) {
