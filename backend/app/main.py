@@ -31,3 +31,10 @@ app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
 @app.get("/")
 def read_root():
     return {"message": "Welcome to WebLearning API"}
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    # run with uvicorn when executed as script
+    uvicorn.run("backend.app.main:app", host="127.0.0.1", port=8000, reload=True)

@@ -9,7 +9,9 @@ function AdminPanel() {
   const [description, setDescription] = useState('');
   const [courseId, setCourseId] = useState('');
   const [questionCount, setQuestionCount] = useState(0);
+  const [timeLimit, setTimeLimit] = useState(60); // Time limit in minutes
   const [video, setVideo] = useState(null);
+  const [youtubeUrl, setYoutubeUrl] = useState('');
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState('');
   const [exams, setExams] = useState([]);
@@ -18,6 +20,7 @@ function AdminPanel() {
   const [editingCourse, setEditingCourse] = useState(null);
   const [questions, setQuestions] = useState([]);
   const [editingQuestion, setEditingQuestion] = useState(null);
+  const [showQuestionsModal, setShowQuestionsModal] = useState(false);
 
   const handleVideoChange = (e) => {
     setVideo(e.target.files[0]);
@@ -29,6 +32,7 @@ function AdminPanel() {
     setDescription('');
     setVideo(null);
     setCourseId('');
+    setTimeLimit(60);
     setMessage('');
     setEditingExam(null);
     setEditingCourse(null);
@@ -72,14 +76,7 @@ function AdminPanel() {
       setMessage('Savollar sonini ijobiy raqam qilib belgilang');
       return;
     }
-
-    setUploading(true);
-    setMessage('');
-
-    try {
-      if (mode === 'course') {
-        const formData = new FormData();
-        formData.append('title', title);
+    // youtube url is optional, no validation>
         formData.append('description', description);
         formData.append('owner_id', 1); // default user
         if (video) {
@@ -112,7 +109,7 @@ function AdminPanel() {
         fetchCourses();
       } else {
         // exam mode
-        const payload = { title, description, course_id: parseInt(courseId, 10), question_count: parseInt(questionCount, 10) };
+        const payload = { title, description, course_id: parseInt(courseId, 10), question_count: parseInt(questionCount, 10), time_limit: parseInt(timeLimit, 10) };
         if (editingExam) {
           // update
           await axios.put(`http://localhost:8000/exams/${editingExam.id}`, payload);
@@ -125,6 +122,7 @@ function AdminPanel() {
         setDescription('');
         setCourseId('');
         setQuestionCount(0);
+        setTimeLimit(60);
         setEditingExam(null);
         fetchExams();
       }
@@ -147,8 +145,14 @@ function AdminPanel() {
   const manageQuestions = (exam) => {
     setEditingExam(exam);
     fetchQuestions(exam.id);
-    setMode('exam');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setShowQuestionsModal(true);
+  };
+
+  const closeQuestionsModal = () => {
+    setShowQuestionsModal(false);
+    setEditingExam(null);
+    setQuestions([]);
+    setEditingQuestion(null);
   };
 
   const handleDeleteCourse = async (course) => {
@@ -232,6 +236,15 @@ function AdminPanel() {
                 value={questionCount}
                 onChange={(e) => setQuestionCount(e.target.value)}
                 placeholder="Imtixon uchun savollar soni"
+                className="admin-input form-control"
+                min={1} />
+            </div><div className="admin-form-group mb-3">
+              <label>Vaqt Chegarasi (daqiqa) *</label>
+              <input
+                type="number"
+                value={timeLimit}
+                onChange={(e) => setTimeLimit(e.target.value)}
+                placeholder="Imtixon yakunlanish vaqti"
                 className="admin-input form-control"
                 min={1} />
             </div></>
@@ -346,17 +359,24 @@ function AdminPanel() {
           </ul>
         )}
       </div>
-      {editingExam && (
-        <div className="mt-4 p-3 border rounded">
-          <h3>Imtixon: {editingExam.title} uchun savollar</h3>
-          <QuestionForm
-            examId={editingExam.id}
-            questions={questions}
-            setQuestions={setQuestions}
-            editingQuestion={editingQuestion}
-            setEditingQuestion={setEditingQuestion}
-            refreshQuestions={() => fetchQuestions(editingExam.id)}
-          />
+      {showQuestionsModal && editingExam && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1050 }}>
+          <div style={{ background: '#fff', padding: '1rem', borderRadius: '6px', width: '90%', maxWidth: '900px', maxHeight: '90%', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+              <h3 style={{ margin: 0 }}>Imtixon: {editingExam.title} uchun savollar</h3>
+              <button className="btn btn-sm btn-secondary" onClick={closeQuestionsModal}>Yopish</button>
+            </div>
+            <div>
+              <QuestionForm
+                examId={editingExam.id}
+                questions={questions}
+                setQuestions={setQuestions}
+                editingQuestion={editingQuestion}
+                setEditingQuestion={setEditingQuestion}
+                refreshQuestions={() => fetchQuestions(editingExam.id)}
+              />
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
 from sqlalchemy.orm import Session
 from .. import schemas, models
 from ..database import get_db
@@ -12,16 +12,29 @@ router = APIRouter()
 UPLOAD_DIR = os.path.join(os.path.dirname(__file__), "..", "uploads")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
+# Supported video formats
+ALLOWED_VIDEO_FORMATS = {'.mp4', '.webm', '.ogv', '.ogg', '.mov', '.avi', '.mkv'}
+
+def validate_video_format(filename: str) -> bool:
+    """Check if file has an allowed video format"""
+    ext = os.path.splitext(filename)[1].lower()
+    return ext in ALLOWED_VIDEO_FORMATS
+
 @router.post("/", response_model=schemas.Course)
 def create_course(
     title: str = Form(...),
     description: str = Form(""),
     owner_id: int = Form(1),
+    youtube_url: str = Form(""),
     video: UploadFile = File(None),
     db: Session = Depends(get_db),
 ):
     video_url = None
     if video:
+        # validate video format
+        if not validate_video_format(video.filename):
+            raise HTTPException(status_code=400, detail=f"Video format not supported. Allowed formats: MP4, WebM, Ogg, Mov, Avi, Mkv")
+        
         # save uploaded file
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"{timestamp}_{video.filename}"
@@ -30,7 +43,13 @@ def create_course(
             shutil.copyfileobj(video.file, buffer)
         video_url = f"/uploads/{filename}"
     
-    db_course = models.Course(title=title, description=description, video_url=video_url, owner_id=owner_id)
+    db_course = models.Course(
+        title=title,
+        description=description,
+        video_url=video_url,
+        youtube_url=youtube_url if youtube_url.strip() else None,
+        owner_id=owner_id
+    )
     db.add(db_course)
     db.commit()
     db.refresh(db_course)
@@ -53,6 +72,7 @@ def update_course(
     course_id: int,
     title: str = Form(...),
     description: str = Form(""),
+    youtube_url: str = Form(""),
     video: UploadFile = File(None),
     db: Session = Depends(get_db),
 ):
@@ -62,8 +82,13 @@ def update_course(
     
     db_course.title = title
     db_course.description = description
+    db_course.youtube_url = youtube_url if youtube_url.strip() else None
     
     if video:
+        # validate video format
+        if not validate_video_format(video.filename):
+            raise HTTPException(status_code=400, detail=f"Video format not supported. Allowed formats: MP4, WebM, Ogg, Mov, Avi, Mkv")
+        
         # delete old video if exists
         if db_course.video_url:
             old_path = os.path.join(UPLOAD_DIR, db_course.video_url.split("/")[-1])

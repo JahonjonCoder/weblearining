@@ -50,7 +50,7 @@ function QuestionForm({ examId, questions, setQuestions, editingQuestion, setEdi
         await axios.put(`http://localhost:8000/questions/${editingQuestion.id}`, payload);
         setMessage('Savol yangilandi');
       } else {
-        await axios.post(`http://localhost:8000/${examId}/questions`, payload);
+        await axios.post(`http://localhost:8000/exams/${examId}/questions`, payload);
         setMessage('Savol qo\'shildi');
       }
       clearForm();

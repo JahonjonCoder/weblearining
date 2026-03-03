@@ -4,6 +4,7 @@ import AdminPanel from './AdminPanel';
 import ExamViewer from './ExamViewer';
 import Login from './Login';
 import Register from './Register';
+import VideoPlayer from './VideoPlayer';
 import './App.scss';
 
 function App() {
@@ -13,6 +14,7 @@ function App() {
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [courseExams, setCourseExams] = useState([]);
   const [view, setView] = useState('courses'); // 'courses' or 'admin' or 'exams' or 'takeExam' or 'courseDetail' or 'login' or 'register' or 'profile'
+  // adminSubview removed; always show panel
   const [user, setUser] = useState(null); // logged-in user info
 
   useEffect(() => {
@@ -57,14 +59,9 @@ function App() {
 
   const viewCourse = (course) => {
     setSelectedCourse(course);
-    // filter or fetch exams for this course
-    axios.get('http://localhost:8000/exams/')
-      .then(resp => {
-        const examsFor = resp.data.filter(e => e.course_id === course.id);
-        setCourseExams(examsFor);
-        setView('courseDetail');
-      })
-      .catch(err => console.error(err));
+    // show course detail only (exams are managed in the 'exams' view)
+    setCourseExams([]);
+    setView('courseDetail');
   };
 
   const backToExams = () => {
@@ -169,27 +166,10 @@ function App() {
             <h2>{selectedCourse.title}</h2>
             <p>{selectedCourse.description}</p>
             {selectedCourse.video_url && (
-              <video width="100%" height="480" controls className="app-video">
-                <source src={`http://localhost:8000${selectedCourse.video_url}`} type="video/mp4" />
-                Video qo'llab-quvvatlanmaydi.
-              </video>
+              <VideoPlayer videoUrl={selectedCourse.video_url} title={`${selectedCourse.title} videosi`} />
             )}
-            <h3>Kursga doir imtixonlar</h3>
-            {courseExams.length === 0 ? (
-              <p>Bu kursga imtixonlar mavjud emas.</p>
-            ) : (
-              <ul>
-                {courseExams.map(ex => (
-                  <li
-                    key={ex.id}
-                    className="app-exam-item"
-                    onClick={() => takeExam(ex)}
-                  >
-                    {ex.title}
-                  </li>
-                ))}
-              </ul>
-            )}
+            {/* Exams are shown under the Imtixon (exams) section only */}
+            <p className="text-muted">Imtixonlar sahifasida bu kursga oid imtixonlarni ko'rishingiz mumkin.</p>
           </div>
         )}
 
@@ -224,7 +204,13 @@ function App() {
           <ExamViewer exam={selectedExam} onBack={backToExams} />
         )}
 
-        {view === 'admin' && user?.is_admin && <AdminPanel />}
+        {view === 'admin' && user?.is_admin && (
+          <div>
+            <div className="admin-subview-nav" style={{ marginBottom: '20px' }}>
+              <AdminPanel />
+            </div>
+          </div>
+        )}
 
         {view === 'login' && <Login onLoginSuccess={(u) => { setUser(u); setView('courses'); }} onSwitchToRegister={() => setView('register')} />}
         {view === 'register' && <Register onRegisterSuccess={() => setView('login')} onSwitchToLogin={() => setView('login')} />}
